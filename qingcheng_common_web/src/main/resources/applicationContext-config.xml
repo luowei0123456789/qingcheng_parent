@@ -41,6 +41,6 @@
 	</bean>
 
 	<!--开启任务调度-->
-	<task:annotation-driven></task:annotation-driven>
+<!--	<task:annotation-driven></task:annotation-driven>-->
 
 </beans>
