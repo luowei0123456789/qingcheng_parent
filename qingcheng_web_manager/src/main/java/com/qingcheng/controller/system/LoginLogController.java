@@ -37,7 +37,7 @@ public class LoginLogController {
     public PageResult<LoginLog> findPageByLogin(int page, int size){
         //添加条件
         String loginName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Map map=new HashMap();
+        Map map = new HashMap();
         map.put("loginName",loginName);
         return loginLogService.findPage(map,page,size);
     }

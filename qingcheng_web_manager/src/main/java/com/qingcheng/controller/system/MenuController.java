@@ -65,4 +65,8 @@ public class MenuController {
         return menuService.findAllMenu();
     }
 
+    @GetMapping("/queryPermissions")
+    public List<Menu> QueryPermissions(String loginName){
+        return menuService.QueryPermissions(loginName);
+    }
 }

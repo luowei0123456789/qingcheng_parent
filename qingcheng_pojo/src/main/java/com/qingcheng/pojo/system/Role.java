@@ -13,9 +13,6 @@ public class Role implements Serializable{
 	@Id
 	private Integer id;//ID
 
-
-	
-
 	private String name;//角色名称
 
 	

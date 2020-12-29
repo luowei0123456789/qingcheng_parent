@@ -1,26 +1,87 @@
 package com.qingcheng.service.impl;
+
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.AdminMapper;
+import com.qingcheng.dao.AdminRoleMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.system.Admin;
+import com.qingcheng.pojo.system.AdminRole;
+import com.qingcheng.pojo.system.Admins;
 import com.qingcheng.service.system.AdminService;
+import com.qingcheng.util.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service(interfaceClass = AdminService.class)
 public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private AdminMapper adminMapper;
 
+    @Autowired
+    AdminRoleMapper adminRoleMapper;
+
+    /**
+     * 新增
+     * @param admins
+     */
+    @Transactional
+    public void add(Admins admins) {
+        Admin admin = admins.getAdmin();
+        adminMapper.insert(admin);
+        List<Integer> roleIds = admins.getRoleIds();
+        AdminRole admin_role = new AdminRole();
+        for (Integer roleId : roleIds) {
+            admin_role.setRoleId(roleId);
+            admin_role.setAdminId(admin.getId());
+        }
+        //对密码进行加密
+        String gensalt = BCrypt.gensalt();
+        String new_password = BCrypt.hashpw(admin.getPassword(), gensalt);
+        admin.setPassword(new_password);
+        adminMapper.updateByPrimaryKeySelective(admin);
+        adminRoleMapper.insert(admin_role);
+    }
+
+    /**
+     * 修改密码
+     * @param editMap 前端传递的用户信息
+     */
+    public void editPassword(Map<String,String> editMap){
+        String old_Password = editMap.get("oldPassword"); //原密码
+        String loginName = editMap.get("loginName"); //用户名称
+        String new_password = editMap.get("newPassword"); //新密码
+        //根据用户名查询数据库得到用户全部信息
+        Example example = new Example(Admin.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(loginName);
+        List<Admin> admins = adminMapper.selectByExample(example);
+        for (Admin admin : admins) {
+            //判断原密码和用户输入的密码是否相似
+            if(!BCrypt.checkpw(old_Password,admin.getPassword())){
+                throw new RuntimeException("抱歉,您输入的原密码不正确");
+            }
+            //获取到盐
+            String gensalt = BCrypt.gensalt();
+            //根据盐对密码进行加密
+            String grnsalt_password = BCrypt.hashpw(new_password, gensalt);
+            //保存新密码
+            admin.setPassword(grnsalt_password);
+            adminMapper.updateByPrimaryKeySelective(admin);
+        }
+    }
+
+
+
     /**
      * 返回全部记录
-     * @return
+     * @return 返回全部数据
      */
     public List<Admin> findAll() {
         return adminMapper.selectAll();
@@ -67,24 +128,27 @@ public class AdminServiceImpl implements AdminService {
      * @param id
      * @return
      */
-    public Admin findById(Integer id) {
-        return adminMapper.selectByPrimaryKey(id);
+    public Admins findById(Integer id) {
+        Admin admin = adminMapper.selectByPrimaryKey(id);
+        List<Integer> roleIds = adminRoleMapper.findByRoleIds(id);
+        return new Admins(admin,roleIds);
     }
 
     /**
-     * 新增
-     * @param admin
+     * 新增用户
+     * @param admins
      */
-    public void add(Admin admin) {
-        adminMapper.insert(admin);
-    }
-
-    /**
-     * 修改
-     * @param admin
-     */
-    public void update(Admin admin) {
-        adminMapper.updateByPrimaryKeySelective(admin);
+    @Transactional
+    public void update(Admins admins) {
+        Admin admin = admins.getAdmin();
+        adminRoleMapper.deleteByAdminId(admin.getId());
+        List<Integer> roleIds = admins.getRoleIds();
+        AdminRole adminRole = new AdminRole();
+        for (Integer roleId : roleIds) {
+            adminRole.setAdminId(admin.getId());
+            adminRole.setRoleId(roleId);
+            adminRoleMapper.insert(adminRole);
+        }
     }
 
     /**
@@ -92,6 +156,7 @@ public class AdminServiceImpl implements AdminService {
      * @param id
      */
     public void delete(Integer id) {
+        adminRoleMapper.deleteByAdminId(id);
         adminMapper.deleteByPrimaryKey(id);
     }
 
@@ -106,7 +171,7 @@ public class AdminServiceImpl implements AdminService {
         if(searchMap!=null){
             // 用户名
             if(searchMap.get("loginName")!=null && !"".equals(searchMap.get("loginName"))){
-                //criteria.andLike("loginName","%"+searchMap.get("loginName")+"%");
+//                criteria.andLike("loginName","%"+searchMap.get("loginName")+"%");
                 criteria.andEqualTo("loginName",searchMap.get("loginName"));
             }
             // 密码
@@ -121,9 +186,7 @@ public class AdminServiceImpl implements AdminService {
             if(searchMap.get("id")!=null ){
                 criteria.andEqualTo("id",searchMap.get("id"));
             }
-
         }
         return example;
     }
-
 }

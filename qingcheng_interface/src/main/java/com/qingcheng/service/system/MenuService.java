@@ -32,7 +32,7 @@ public interface MenuService {
 
     public void delete(String id);
 
+    List<Map> findAllMenu();
 
-    public List<Map> findAllMenu();
-
+    List<Menu> QueryPermissions(String loginName);
 }

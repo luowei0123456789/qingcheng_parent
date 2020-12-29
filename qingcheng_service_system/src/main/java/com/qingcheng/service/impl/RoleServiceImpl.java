@@ -1,22 +1,36 @@
 package com.qingcheng.service.impl;
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.qingcheng.dao.AdminMapper;
+import com.qingcheng.dao.AdminRoleMapper;
 import com.qingcheng.dao.RoleMapper;
+import com.qingcheng.dao.RoleResourceMapper;
 import com.qingcheng.entity.PageResult;
-import com.qingcheng.pojo.system.Role;
+import com.qingcheng.pojo.system.*;
 import com.qingcheng.service.system.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service(interfaceClass = RoleService.class)
 public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    RoleResourceMapper roleResourceMapper;
+
+    @Autowired
+    AdminMapper adminMapper;
+
+    @Autowired
+    AdminRoleMapper adminRoleMapper;
 
     /**
      * 返回全部记录
@@ -24,6 +38,33 @@ public class RoleServiceImpl implements RoleService {
      */
     public List<Role> findAll() {
         return roleMapper.selectAll();
+    }
+
+    /**
+     * 获取到中间表信息
+     * @param id 前端传递的用户id
+     * @return
+     */
+    public List<Integer> findResourceIdsByRoleId(Integer id) {
+        return roleMapper.findResourceIdsByRoleId(id);
+    }
+
+    /**
+     * 修改权限
+     * @param resources
+     * @return
+     */
+    @Override
+    public void changeResource(Resources resources) {
+        Integer[] resourceIds = resources.getResourceIds(); //权限id数组
+        Integer roleId = resources.getRoleId(); //角色id
+        roleResourceMapper.deleteByRoleId(roleId);
+        RoleResource resource = new RoleResource();
+        for (Integer resourceId : resourceIds) {
+            resource.setResource_id(resourceId);
+            resource.setRole_id(roleId);
+            roleResourceMapper.insert(resource);
+        }
     }
 
     /**
@@ -93,6 +134,24 @@ public class RoleServiceImpl implements RoleService {
      */
     public void delete(Integer id) {
         roleMapper.deleteByPrimaryKey(id);
+    }
+
+    /**
+     * 获取到前端传递的角色id和权限id列表查询数据库返回给前端
+     * @param roles 前台传递的集合数据
+     * @return 从数据库查出的数据
+     */
+    @Override
+    @Transactional
+    public void getRolesAndResourceList(Roles roles) {
+        Role role = roles.getRole();
+        List<Integer> resourceIds = roles.getResourceList();
+        RoleResource roleResource = new RoleResource();
+        for (Integer resourceId : resourceIds) {
+            roleResource.setRole_id(role.getId());
+            roleResource.setResource_id(resourceId);
+            roleResourceMapper.insert(roleResource);
+        }
     }
 
     /**

@@ -1,4 +1,9 @@
 package com.qingcheng.pojo.system;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -7,14 +12,15 @@ import java.io.Serializable;
  * @author Administrator
  *
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 @Table(name="tb_resource")
-public class Resource implements Serializable{
+public class Resource implements Serializable {
 
 	@Id
 	private Integer id;//id
-
-
-	
 
 	private String resKey;//res_key
 
@@ -22,35 +28,4 @@ public class Resource implements Serializable{
 
 	private Integer parentId;//parent_id
 
-	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public String getResKey() {
-		return resKey;
-	}
-	public void setResKey(String resKey) {
-		this.resKey = resKey;
-	}
-
-	public String getResName() {
-		return resName;
-	}
-	public void setResName(String resName) {
-		this.resName = resName;
-	}
-
-	public Integer getParentId() {
-		return parentId;
-	}
-	public void setParentId(Integer parentId) {
-		this.parentId = parentId;
-	}
-
-
-	
 }

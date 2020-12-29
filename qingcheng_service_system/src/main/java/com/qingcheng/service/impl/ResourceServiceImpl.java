@@ -3,12 +3,16 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.qingcheng.dao.ResourceMapper;
+import com.qingcheng.dao.RoleResourceMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.system.Resource;
+import com.qingcheng.pojo.system.RoleResource;
 import com.qingcheng.service.system.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,11 +22,15 @@ public class ResourceServiceImpl implements ResourceService {
     @Autowired
     private ResourceMapper resourceMapper;
 
+    @Autowired
+    RoleResourceMapper roleResourceMapper;
+
     /**
      * 返回全部记录
      * @return
      */
     public List<Resource> findAll() {
+
         return resourceMapper.selectAll();
     }
 
@@ -93,6 +101,42 @@ public class ResourceServiceImpl implements ResourceService {
      */
     public void delete(Integer id) {
         resourceMapper.deleteByPrimaryKey(id);
+    }
+
+    /**
+     * 获取到所有信息，以书结构返回
+     * @return
+     */
+    @Override
+    public List<Map> findAllResource() {
+        List<Resource> resourceList = this.findAll();
+        return this.findMenuListByParentId(resourceList,0);
+    }
+
+    /**
+     * 根据用户名查询数据库权限添加
+     * @param loginName
+     */
+    @Override
+    public  List<String> addPermission(String loginName) {
+        return resourceMapper.addPermission(loginName);
+    }
+
+
+    private List<Map> findMenuListByParentId(List<Resource> resourceList,Integer parentId ){
+        List<Map> mapList = new ArrayList<>();
+        for (Resource resource : resourceList) {
+            if(resource.getParentId().equals(parentId)){
+                Map map = new HashMap();
+                map.put("id",resource.getId());
+                map.put("resKey",resource.getResKey());
+                map.put("resName",resource.getResName());
+                map.put("children",findMenuListByParentId(resourceList,resource.getId()));
+
+                mapList.add(map);
+            }
+        }
+        return mapList;
     }
 
     /**

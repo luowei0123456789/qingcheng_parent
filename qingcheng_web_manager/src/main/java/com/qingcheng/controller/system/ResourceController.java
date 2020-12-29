@@ -60,4 +60,8 @@ public class ResourceController {
         return new Result();
     }
 
+    @GetMapping("/findAllResource")
+    public List<Map> findAllResource(){
+        return resourceService.findAllResource();
+    }
 }

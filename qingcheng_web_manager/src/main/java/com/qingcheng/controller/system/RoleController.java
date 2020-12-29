@@ -3,7 +3,10 @@ package com.qingcheng.controller.system;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.entity.Result;
+import com.qingcheng.pojo.system.Resources;
 import com.qingcheng.pojo.system.Role;
+import com.qingcheng.pojo.system.RoleResource;
+import com.qingcheng.pojo.system.Roles;
 import com.qingcheng.service.system.RoleService;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,4 +63,19 @@ public class RoleController {
         return new Result();
     }
 
+    @GetMapping("/roles")
+    public void getRolesAndResourceList(@RequestBody Roles roles){
+         roleService.getRolesAndResourceList(roles);
+    }
+
+    @GetMapping("/findResourceIdsByRoleId")
+    public List<Integer> findResourceIdsByRoleId(Integer id){
+        return roleService.findResourceIdsByRoleId(id);
+    }
+
+    @PostMapping("/changeResource")
+    public Result changeResource(@RequestBody Resources Resources){
+        roleService.changeResource(Resources);
+        return new Result();
+    }
 }

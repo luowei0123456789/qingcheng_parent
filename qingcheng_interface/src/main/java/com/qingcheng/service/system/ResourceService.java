@@ -1,6 +1,8 @@
 package com.qingcheng.service.system;
 import com.qingcheng.entity.PageResult;
+import com.qingcheng.pojo.system.Menu;
 import com.qingcheng.pojo.system.Resource;
+import com.qingcheng.pojo.system.RoleResource;
 
 import java.util.*;
 
@@ -29,7 +31,9 @@ public interface ResourceService {
 
     public void update(Resource resource);
 
-
     public void delete(Integer id);
 
+    List<Map> findAllResource();
+
+    List<String> addPermission(String loginName);
 }
