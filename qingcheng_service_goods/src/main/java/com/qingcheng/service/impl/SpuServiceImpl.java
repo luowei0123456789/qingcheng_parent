@@ -9,6 +9,7 @@ import com.qingcheng.dao.SkuMapper;
 import com.qingcheng.dao.SpuMapper;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.goods.*;
+import com.qingcheng.service.goods.SkuService;
 import com.qingcheng.service.goods.SpuService;
 import com.qingcheng.util.IdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class SpuServiceImpl implements SpuService {
 
     @Autowired
     private CategoryBrandMapper categoryBrandMapper;
+
+    @Autowired
+    private SkuService skuService;
     /**
      * 返回全部记录
      * @return
@@ -170,8 +174,9 @@ public class SpuServiceImpl implements SpuService {
             sku.setCategoryName(category.getName());//分类名称
             sku.setCommentNum(0);//评论数
             sku.setSaleNum(0);//销售数量
-
             skuMapper.insert(sku);
+            //重新将价格更新到缓存
+            skuService.savePriceToRedisById(sku.getId(),sku.getPrice());
         }
         //建立分类和品牌的关联
         CategoryBrand categoryBrand=new CategoryBrand();
