@@ -23,7 +23,7 @@
 
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>classpath*:spring-security*.xml</param-value>
+    <param-value>classpath*:spring-security.xml</param-value>
   </context-param>
   <listener>
     <listener-class>
@@ -38,8 +38,6 @@
     <filter-name>springSecurityFilterChain</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-
-
 
   <servlet>
     <servlet-name>springmvc</servlet-name>

@@ -21,6 +21,8 @@
         <module>qingcheng_service_business</module>
         <module>qingcheng_service_user</module>
         <module>qingcheng_service_sms</module>
+        <module>qingcheng_common_cas</module>
+        <module>qingcheng_web_center</module>
     </modules>
     <packaging>pom</packaging>
     <!-- 集中定义依赖版本号 -->
